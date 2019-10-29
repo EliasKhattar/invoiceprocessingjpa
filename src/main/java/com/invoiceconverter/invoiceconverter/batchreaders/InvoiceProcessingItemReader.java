@@ -37,11 +37,7 @@ public class InvoiceProcessingItemReader implements ItemReader<InvoiceProcessing
 
         while (!recordFinished) {
             System.out.println( "Item reader : " + fieldSetReader.read());
-
-            recordFinished = true;
-            return (InvoiceProcessing) fieldSetReader.read();
-            //process(fieldSetReader.read());
-
+            process(fieldSetReader.read());
         }
 
         LOG.info("Mapped : " + invoiceProcessing);
