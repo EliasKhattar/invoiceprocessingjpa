@@ -49,10 +49,6 @@ public class InvoiceProcessingItemReader implements ItemReader<InvoiceProcessing
     private void process(InvoiceProcessing object) throws Exception {
 
 // finish processing if we hit the end of file
-
-
-        //System.out.println("Read : " + object.toString());
-
         if (object == null) {
             LOG.debug("FINISHED");
             recordFinished = true;
