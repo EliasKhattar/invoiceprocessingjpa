@@ -3,14 +3,12 @@ package com.invoiceconverter.invoiceconverter.batchreaders;
 import com.invoiceconverter.invoiceconverter.model.InvoiceHeader;
 import com.invoiceconverter.invoiceconverter.model.InvoiceParty;
 import com.invoiceconverter.invoiceconverter.model.InvoiceProcessing;
-import lombok.Setter;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.*;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
 import org.springframework.lang.Nullable;
-import org.springframework.validation.BindException;
 
 import java.util.ArrayList;
 
@@ -28,63 +26,60 @@ public class InvoiceProcessingItemReader implements ItemReader<InvoiceProcessing
 
     private boolean recordFinished;
 
-    private FlatFileItemReader<FieldSet> fieldSetReader;
+    private FlatFileItemReader fieldSetReader;
 
-    @Nullable
+   // @Nullable
     @Override
     public InvoiceProcessing read() throws Exception {
         recordFinished = false;
 
         while (!recordFinished) {
-            System.out.println( "Item reader : " + fieldSetReader.read());
-            process(fieldSetReader.read());
+           // System.out.println( "Item reader : " + fieldSetReader.read());
+            process((InvoiceProcessing) fieldSetReader.read());
         }
 
         LOG.info("Mapped : " + invoiceProcessing);
 
-        InvoiceProcessing result = invoiceProcessing;
-        invoiceProcessing = null;
+        InvoiceHeader result = invoiceHeader;
+        invoiceHeader = null;
 
         return result;
     }
 
-    private void process(FieldSet fieldSet) throws BindException {
+    private void process(InvoiceProcessing object) throws Exception {
 
 // finish processing if we hit the end of file
 
-        System.out.println("Read : " + fieldSet);
 
-        if (fieldSet == null) {
+        //System.out.println("Read : " + object.toString());
+
+        if (object == null) {
             LOG.debug("FINISHED");
             recordFinished = true;
             invoiceProcessing = null;
             return;
         }
 
-        String lineId = fieldSet.readString(0);
-
-        System.out.println("Line ID : " + lineId);
-
-        if (fieldSet instanceof InvoiceHeader)
+        if (object instanceof InvoiceHeader)
         {
-            invoiceHeader = (InvoiceHeader) fieldSet;
-            System.out.println("Invoice header : " + invoiceHeader);
-        }
-
-        /*if(lineId.equals("A") ){
-            invoiceHeader = invoiceHeaderMapper.mapFieldSet(read);
-        }
-        else if(lineId.equals("I")){
-            LOG.info("Mapping Invoice Party");
+            System.out.println("Invoice header : " + object.toString());
+            invoiceHeader = (InvoiceHeader) object;
+        }else if (object instanceof InvoiceParty){
+            System.out.println("Invoice Party : " + object.toString());
             if(invoiceHeader.getInvoiceParty() == null){
-                invoiceHeader.setInvoiceParty(new ArrayList<>());
+                invoiceHeader.setInvoiceParty(new ArrayList<InvoiceParty>());
             }
-            invoiceHeader.getInvoiceParty().add(invoicePartyMapper.mapFieldSet(read));
-        }*/
+            invoiceHeader.getInvoiceParty().add((InvoiceParty) object);
+            System.out.println("Invoice party array size : " + invoiceHeader.getInvoiceParty().size());
+        }
     }
 
     public void setFieldSetReader(FlatFileItemReader<FieldSet> fieldSetReader) {
         this.fieldSetReader = fieldSetReader;
+    }
+
+    public void setInvoiceProcessing(InvoiceProcessing invoiceProcessing) {
+        this.invoiceProcessing = invoiceProcessing;
     }
 
     @Override
@@ -101,15 +96,4 @@ public class InvoiceProcessingItemReader implements ItemReader<InvoiceProcessing
     public void update(ExecutionContext executionContext) throws ItemStreamException {
         this.fieldSetReader.update(executionContext);
     }
-
-
-    public void setInvoiceHeaderMapper(FieldSetMapper<InvoiceHeader> invoiceHeaderMapper) {
-        this.invoiceHeaderMapper = invoiceHeaderMapper;
-    }
-
-    public void setInvoicePartyMapper(FieldSetMapper<InvoiceParty> invoicePartyMapper) {
-        this.invoicePartyMapper = invoicePartyMapper;
-    }
-
-
 }
