@@ -244,10 +244,10 @@ public class FTPIntegration {
     @Bean
     public SessionFactory<FTPFile> createNewFtpSessionFactory() {
         final DefaultFtpSessionFactory factory = new DefaultFtpSessionFactory();
-        factory.setHost("bom-fs.bom.ei");
-        factory.setUsername("bom-ftp");
-        factory.setPort(21);
-        factory.setPassword("spicysilk");
+        factory.setHost("xxxxx");
+        factory.setUsername("xxx");
+        factory.setPort(xx);
+        factory.setPassword("xxx");
         return factory;
     }
 
